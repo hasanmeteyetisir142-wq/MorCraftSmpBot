@@ -6,7 +6,7 @@ const config = {
   port: Number(process.env.MC_PORT || 25565),
   version: process.env.MC_VERSION || "1.21.8",
   username: process.env.BOT_USERNAME || "MorCraftBot",
-  auth: process.env.MC_AUTH || "microsoft",
+  auth: process.env.MC_AUTH || "offline",
   admin: process.env.BOT_ADMIN || ""
 };
 
