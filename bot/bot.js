@@ -6,12 +6,14 @@ const config = {
   port: Number(process.env.MC_PORT || 25565),
   version: process.env.MC_VERSION || "1.21.8",
   username: process.env.BOT_USERNAME || "MorCraftBot",
-  auth: process.env.MC_AUTH || "offline",
-  admin: process.env.BOT_ADMIN || ""
+  auth: process.env.MC_AUTH || "offline"
 };
 
 let bot;
-let stopping = false;
+let welcomeTimer;
+let shuttingDown = false;
+const lastReplyByPlayer = new Map();
+const REPLY_COOLDOWN_MS = 5000;
 
 function startBot() {
   console.log(`[MorCraftBot] ${config.host}:${config.port} sürüm=${config.version}`);
@@ -27,33 +29,52 @@ function startBot() {
   bot.once("login", () => console.log("[MorCraftBot] Sunucuya giriş yapıldı."));
   bot.once("spawn", () => {
     console.log("[MorCraftBot] Dünyaya giriş tamamlandı.");
-    setTimeout(() => {
+    clearTimeout(welcomeTimer);
+    welcomeTimer = setTimeout(() => {
       if (bot && bot.player) bot.chat("MorCraftSmp'ye hoş geldiniz!");
     }, 3000);
   });
+
+  bot.on("chat", (username, message) => {
+    if (!username || username === bot.username) return;
+
+    const now = Date.now();
+    const previous = lastReplyByPlayer.get(username) || 0;
+    if (now - previous < REPLY_COOLDOWN_MS) return;
+
+    const command = message.trim().toLocaleLowerCase("tr-TR");
+    let reply = null;
+
+    if (command === "!bot" || command === "!yardim") {
+      reply = "MorCraftBot aktif! Komutlar: !bot, !oyuncular";
+    } else if (command === "!oyuncular") {
+      const names = Object.keys(bot.players);
+      reply = `Çevrimiçi oyuncular (${names.length}): ${names.slice(0, 10).join(", ") || "yok"}`;
+    }
+
+    if (reply) {
+      lastReplyByPlayer.set(username, now);
+      bot.chat(reply);
+    }
+  });
+
   bot.on("kicked", reason => console.log("[MorCraftBot] Sunucudan atıldı:", reason));
   bot.on("error", err => console.error("[MorCraftBot] Bağlantı hatası:", err.message));
   bot.on("end", () => {
+    clearTimeout(welcomeTimer);
     console.log("[MorCraftBot] Bağlantı sona erdi. Otomatik tekrar bağlanma kapalı.");
-    stopping = true;
-  });
-
-  bot.on("chat", (username, message) => {
-    if (username === bot.username) return;
-    const text = message.trim().toLowerCase();
-    if (text === "!bot" || text === "!yardim") {
-      bot.chat("MorCraftBot aktif! Komutlar: !bot, !oyuncular");
-    } else if (text === "!oyuncular") {
-      const names = Object.keys(bot.players);
-      bot.chat(`Çevrimiçi oyuncular (${names.length}): ${names.slice(0, 10).join(", ") || "yok"}`);
-    }
   });
 }
 
-process.on("SIGINT", () => {
-  stopping = true;
+function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  clearTimeout(welcomeTimer);
   if (bot) bot.quit("Kapatılıyor");
-  process.exit(0);
-});
+  setTimeout(() => process.exit(0), 250);
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
 
 startBot();
