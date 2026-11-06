@@ -25,7 +25,12 @@ function startBot() {
   });
 
   bot.once("login", () => console.log("[MorCraftBot] Sunucuya giriş yapıldı."));
-  bot.once("spawn", () => console.log("[MorCraftBot] Dünyaya giriş tamamlandı."));
+  bot.once("spawn", () => {
+    console.log("[MorCraftBot] Dünyaya giriş tamamlandı.");
+    setTimeout(() => {
+      if (bot && bot.player) bot.chat("MorCraftSmp'ye hoş geldiniz!");
+    }, 3000);
+  });
   bot.on("kicked", reason => console.log("[MorCraftBot] Sunucudan atıldı:", reason));
   bot.on("error", err => console.error("[MorCraftBot] Bağlantı hatası:", err.message));
   bot.on("end", () => {
