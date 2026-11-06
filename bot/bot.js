@@ -1,5 +1,20 @@
 require("dotenv").config();
 const mineflayer = require("mineflayer");
+const http = require("node:http");
+
+// Render Web Service health endpoint. This does not keep a free service awake.
+const healthServer = http.createServer((req, res) => {
+  if (req.url === "/health") {
+    res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+    res.end(JSON.stringify({ service: "MorCraftBot", minecraftConnected: Boolean(bot && bot.player) }));
+    return;
+  }
+  res.writeHead(200, { "content-type": "text/plain; charset=utf-8" });
+  res.end("MorCraftBot servisi hazır.");
+});
+healthServer.listen(Number(process.env.PORT || 3000), "0.0.0.0", () => {
+  console.log("[MorCraftBot] HTTP sağlık sunucusu hazır.");
+});
 
 const config = {
   host: process.env.MC_HOST || "MorCraftSmp.aternos.me",
