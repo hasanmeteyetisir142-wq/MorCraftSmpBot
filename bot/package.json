@@ -1,0 +1,17 @@
+{
+  "name": "morcraftsmp-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MorCraftSmp Minecraft Java chat bot",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "mineflayer": "^4.31.0",
+    "dotenv": "^16.4.7"
+  }
+}
