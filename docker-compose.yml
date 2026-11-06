@@ -1,0 +1,7 @@
+services:
+  morcraftbot:
+    build: .
+    container_name: morcraftbot
+    restart: "no"
+    env_file:
+      - bot/.env
