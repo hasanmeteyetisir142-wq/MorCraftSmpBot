@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MorCraftSmp • Yönetim Paneli</title>
+<style>
+:root{color-scheme:dark;--bg:#100d18;--panel:#1b1527;--line:#382b4d;--purple:#a78bfa;--muted:#b9adc9}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#30204a,#100d18 55%);font:15px system-ui;color:#f5f0ff;min-height:100vh}
+header{padding:34px 20px 20px;text-align:center}h1{margin:0;font-size:clamp(27px,5vw,42px)}header p{color:var(--muted);margin:8px 0}
+main{width:min(960px,calc(100% - 28px));margin:0 auto 50px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr))}
+section{background:#1b1527eF;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 12px 40px #0003}h2{font-size:18px;margin:0 0 14px}
+label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}input,select,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#100d18;color:white;font:inherit}
+button{border:0;border-radius:10px;background:var(--purple);color:#160e25;padding:11px 15px;font-weight:700;cursor:pointer;margin-top:12px}button.secondary{background:#332746;color:#eee}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#100d18;border:1px solid var(--line);padding:14px;border-radius:10px;min-height:48px;color:#d8c9ff}
+.note{font-size:13px;color:var(--muted);line-height:1.6}.pill{display:inline-block;padding:5px 9px;border-radius:20px;background:#332746;color:#d9c8ff;font-size:12px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:0 20px 28px}
+</style></head>
+<body>
+<header><span class="pill">MINECRAFT JAVA • TOPLULUK PANELİ</span><h1>💜 MorCraftSmp</h1><p>Sunucu yardımcı paneli</p></header>
+<main>
+<section><h2>Komut oluşturucu</h2>
+<p class="note">Komutunu burada hazırla, kopyala ve sunucunun oyun içi sohbetine veya yetkili konsoluna kendin yapıştır.</p>
+<label>Komut türü</label><select id="kind"><option value="say">Duyuru (say)</option><option value="give">Eşya ver (give)</option><option value="tp">Işınla (tp)</option><option value="time">Zaman (time set)</option><option value="weather">Hava durumu (weather)</option><option value="gamemode">Oyun modu</option><option value="kick">Oyuncuyu at (kick)</option></select>
+<div id="fields"></div><button id="make">Komutu oluştur</button><pre id="out">Komut burada görünecek…</pre><button class="secondary" id="copy">Komutu kopyala</button></section>
+<section><h2>Sunucu bilgileri</h2><label>Sunucu adresi</label><input id="server" placeholder="Örn: morcraftsmp.aternos.me"><label>Sunucu sürümü</label><input id="version" placeholder="Örn: Java 1.21.x"><button id="save">Bilgileri bu tarayıcıda sakla</button><p id="saved" class="note">Bu bilgiler yalnızca kullandığın tarayıcıda saklanır.</p>
+<h2 style="margin-top:24px">Bağlantı durumu</h2><span class="pill">Harici bağlantı kurulmadı</span><p class="note">Bu ilk sürüm statik bir paneldir. Aternos'a bağlanıp otomatik komut göndermez ve botu 7/24 çalıştırmaz. Aternos'un resmi imkanları dışında otomatik erişim veya sürekli çevrimiçi kalma sözü veremeyiz.</p></section>
+<section><h2>Kurulum notları</h2><p class="note">Bu panel GitHub Pages üzerinde ücretsiz yayınlanabilir. Depo ayarlarından Pages'i açıp dağıtım kaynağı olarak main dalı ve / (root) klasörünü seç. Sonra verilen Pages adresini kullan.</p><p class="note">Güvenlik: Aternos şifreni, oturum çerezini veya özel erişim anahtarlarını bu panele yazma.</p></section>
+</main><footer>MorCraftSmp • Bağımsız topluluk aracı</footer>
+<script>
+const el=id=>document.getElementById(id), fields=el('fields');
+const specs={say:[['message','Duyuru metni','text']],give:[['player','Oyuncu adı','text'],['item','Eşya kimliği','text'],['amount','Miktar','number']],tp:[['player','Oyuncu adı','text'],['target','Hedef oyuncu / koordinat','text']],time:[['value','Zaman (day, night, noon)','text']],weather:[['value','Hava (clear, rain, thunder)','text']],gamemode:[['mode','Mod (survival, creative, adventure, spectator)','text'],['player','Oyuncu adı','text']],kick:[['player','Oyuncu adı','text'],['reason','Sebep (isteğe bağlı)','text']]};
+function render(){fields.innerHTML='';for(const [id,label,type] of specs[el('kind').value]){const l=document.createElement('label');l.textContent=label;const i=document.createElement('input');i.id='f_'+id;i.type=type;i.placeholder=label;if(id==='amount'){i.min='1';i.value='1'}fields.append(l,i)}}
+el('kind').addEventListener('change',render);render();
+el('make').onclick=()=>{const v=id=>el('f_'+id)?.value.trim()||'';let c='',k=el('kind').value;
+if(k==='say'&&v('message'))c='/say '+v('message');
+if(k==='give'&&v('player')&&v('item')&&Number(v('amount'))>0)c='/give '+v('player')+' '+v('item')+' '+Number(v('amount'));
+if(k==='tp'&&v('player')&&v('target'))c='/tp '+v('player')+' '+v('target');
+if(k==='time'&&['day','night','noon','midnight'].includes(v('value')))c='/time set '+v('value');
+if(k==='weather'&&['clear','rain','thunder'].includes(v('value')))c='/weather '+v('value');
+if(k==='gamemode'&&['survival','creative','adventure','spectator'].includes(v('mode'))&&v('player'))c='/gamemode '+v('mode')+' '+v('player');
+if(k==='kick'&&v('player'))c='/kick '+v('player')+(v('reason')?' '+v('reason'):'');
+el('out').textContent=c||'Alanları kontrol et. Geçerli değerler girilmedi.'};
+el('copy').onclick=async()=>{const t=el('out').textContent;if(t.startsWith('/')){try{await navigator.clipboard.writeText(t);el('copy').textContent='Kopyalandı!';setTimeout(()=>el('copy').textContent='Komutu kopyala',1500)}catch{el('copy').textContent='Kopyalama başarısız'}}};
+el('save').onclick=()=>{localStorage.setItem('morcraft_server',el('server').value);localStorage.setItem('morcraft_version',el('version').value);el('saved').textContent='Bilgiler bu tarayıcıya kaydedildi.'};
+el('server').value=localStorage.getItem('morcraft_server')||'';el('version').value=localStorage.getItem('morcraft_version')||'';
+</script></body></html>
