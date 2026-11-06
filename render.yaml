@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: morcraftsmp-bot
+    runtime: node
+    plan: free
+    rootDir: bot
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: MC_HOST
+        value: MorCraftSmp.aternos.me
+      - key: MC_PORT
+        value: "25565"
+      - key: MC_VERSION
+        value: "1.21.8"
+      - key: BOT_USERNAME
+        value: MorCraftBot
+      - key: MC_AUTH
+        value: offline
